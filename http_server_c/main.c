@@ -17,12 +17,12 @@ void print_usage(char* cmd) // print help and usage message
 	printf("\
 Simple HTTP Server v1.0\n\
 Usage: %s ip:port [-t timeout] [-p respath]\n\
-	ip       server ip address\n\
-	port     server port\n\
-	-t       waiting time when recving data\n\
-	timeout  number bigger than 0\n\
-	-p       resource file(s) path\n\
-	respath  a valid local path no more than 512 bytes\n\
+    ip       server ip address\n\
+    port     server port\n\
+    -t       waiting time when recving data\n\
+    timeout  number bigger than 0\n\
+    -p       resource file(s) path\n\
+    respath  a valid local path no more than 512 bytes\n\
 help:\n\
     -h       show help message\n\
 ", cmd);
@@ -202,10 +202,10 @@ int analyze_header(char* buf, int length, char* path, int* path_ind1)//analyze r
     int i, k;
     char ctmp[16];
     for (i = 0; i < length && i < 15 && buf[i] != ' '; i++)
-        ctmp[i] = buf[i];
+        ctmp[i] = buf[i] | 0x20;
     ctmp[i] = '\0';
     //request method
-    if (strcmp(ctmp, "GET") != 0)
+    if (strcmp(ctmp, "get") != 0 && strcmp(ctmp, "post") != 0)
         return 501;// not supported
     for (; i < length && buf[i] != '/'; i++) ;
     //res path
@@ -502,18 +502,19 @@ int main(int argc, char** argv)
     global_timeout = 500;
     global_respath[0] = '\0';
     //读取参数 read command arguments
+#ifndef _DEBUG
 	if(read_args(argc, argv) < 0)
 		return -1;
-    /*
-    int test_argc = 3;
-    char *test_argv[3] = { "server", "0.0.0.0:80", "-p:.\\web\\" };
+#else
+    int test_argc = 6;
+    char *test_argv[6] = { "server", "0.0.0.0:80", "-p", ".\\web\\", "-t", "60000" };
     if (read_args(test_argc, test_argv) < 0)
         	return -1;
-    */
+#endif
     //回显参数 echo arguments
     printf("IP: ");
     print_ip(global_sockaddr.ip);
-    printf("PORT: %u\n", sock_ntohs(global_sockaddr.port));
+    printf("\nPORT: %u\n", sock_ntohs(global_sockaddr.port));
     printf("TIMEOUT: %d\n", global_timeout);
     printf("RESOURCE PATH: %s\n", global_respath);
 	//初始化 initinalize socket
